@@ -11,3 +11,7 @@ app.include_router(auth.router)
 app.include_router(task.router)
 app.include_router(payment.router)
 app.include_router(admin.router)
+
+@app.get("/")
+def root():
+    return {"message": "API is running successfully"}
