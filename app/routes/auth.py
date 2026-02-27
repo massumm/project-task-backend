@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
+from typing import Optional
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, TokenResponse
@@ -52,3 +53,17 @@ def get_me(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "role": current_user.role
     }    
+
+@router.get("/userlist")
+def get_userlist(role: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(User)
+    if role:
+        query = query.filter(User.role == role)
+    users = query.all()
+    return [
+        {
+            "id": user.id,
+            "name": user.name,
+        }
+        for user in users
+    ]
