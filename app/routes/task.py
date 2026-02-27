@@ -1,3 +1,5 @@
+import os
+import shutil
 from fastapi import APIRouter, Depends, HTTPException,UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
@@ -101,6 +103,7 @@ def submit_task(
         raise HTTPException(status_code=400, detail="Task not in progress")
 
     # Save file
+    os.makedirs("uploads", exist_ok=True)
     file_path = f"uploads/{task_id}_{file.filename}"
 
     with open(file_path, "wb") as buffer:
