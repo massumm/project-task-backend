@@ -115,6 +115,24 @@ def submit_task(
 
     return task
 
+@router.get("/mine", response_model=List[TaskResponse])
+def get_my_tasks(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    if current_user.role == "developer":
+        tasks = db.query(Task).filter(
+            Task.assigned_developer == current_user.id
+        ).all()
+    elif current_user.role == "buyer":
+        tasks = db.query(Task).join(Project).filter(
+            Project.buyer_id == current_user.id
+        ).all()
+    else:
+        tasks = []
+    
+    return tasks
+
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(
     task_id: str,

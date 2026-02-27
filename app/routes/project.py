@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.project import Project
+from app.models.task import Task
 from app.schemas.project import ProjectCreate, ProjectResponse
 from app.dependencies.role_checker import role_required, get_current_user
 from typing import List
@@ -29,8 +30,15 @@ def get_my_projects(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    projects = db.query(Project).filter(
-        Project.buyer_id == current_user.id
-    ).all()
+    if current_user.role == "buyer":
+        projects = db.query(Project).filter(
+            Project.buyer_id == current_user.id
+        ).all()
+    elif current_user.role == "developer":
+        projects = db.query(Project).join(Task).filter(
+            Task.assigned_developer == current_user.id
+        ).all()
+    else:
+        projects = []
 
     return projects
